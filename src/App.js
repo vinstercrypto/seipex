@@ -7,7 +7,7 @@ const App = () => {
   const [wallet, setWallet] = useState("");
   const [input, setInput] = useState("");
   const [pk, setPk] = useState("");
-  const [ca, setCa] = useState("");
+  const [ca, setCa] = useState("0x");
   const [roiThreshold, setRoiThreshold] = useState(200);
   const [sellPercentConfig, setSellPercentConfig] = useState(50);
   const [data, setData] = useState([]);
@@ -86,7 +86,7 @@ const App = () => {
             sellPercent();
             clearInterval(intervalId);
           } else {
-            console.log(ROI + "% ROI not reached");
+            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + ca);
           }
         } else if (ca === '0x') {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
