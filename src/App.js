@@ -86,7 +86,7 @@ const App = () => {
             sellPercent();
             clearInterval(intervalId);
           } else {
-            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + ca);
+            console.log(roiThreshold + "% ROI not reached (" + ROI + ")");
           }
         } else if (ca === '0x') {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
@@ -96,6 +96,7 @@ const App = () => {
             clearInterval(intervalId);
           } else {
             console.log(ROI + "% ROI not reached");
+            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + ca);
           }
         }
       }
