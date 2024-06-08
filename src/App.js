@@ -67,12 +67,15 @@ const App = () => {
     setModalIsOpen(true);
 
     console.log('');
-    const data = await fetchData();
+
     const id = setInterval(async () => {
-      console.log('Starting autosell');
+      console.log('Fetching data');
+      const data = await fetchData();
+      console.log('Starting autosell check');
       for (const result of data) {
         const { address, ROI } = result;
-        if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
+        if (address == ca && parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
+          console.log("Checking ROI for selected CA: " + address);
           setCalledTokens(prev => new Set(prev.add(address)));
           sellPercent();
         } else {
