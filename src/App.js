@@ -55,7 +55,7 @@ const App = () => {
           percent: sellPercentConfig
         }
       });
-      console.log(`Sell called for contract address: ${ca}`);
+      console.log(`Sell of ${sellPercentConfig}% called for contract address: ${ca}`);
     } catch (error) {
       console.error(`Error calling sell endpoint for ${ca}:`, error);
     }
