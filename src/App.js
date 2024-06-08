@@ -17,6 +17,7 @@ const App = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [calledTokens, setCalledTokens] = useState(new Set());
+  const [consoleMessages, setConsoleMessages] = useState([]);
 
   const fetchData = async () => {
     if (!wallet || !input) {
@@ -37,6 +38,7 @@ const App = () => {
       return results;
     } catch (error) {
       console.error("Error fetching data:", error);
+      updateConsole(`Error fetching data: ${error.message}`);
     }
   };
 
@@ -56,8 +58,10 @@ const App = () => {
         }
       });
       console.log(`Sell of ${sellPercentConfig}% called for contract address: ${ca}`);
+      updateConsole(`Sell of ${sellPercentConfig}% called for contract address: ${ca}`);
     } catch (error) {
       console.error(`Error calling sell endpoint for ${ca}:`, error);
+      updateConsole(`Error calling sell endpoint for ${ca}: ${error.message}`);
     }
   };
 
@@ -71,36 +75,51 @@ const App = () => {
     setModalMessage('This action will start a process that checks and sells automatically. Keep the page open.');
     setModalIsOpen(true);
 
-    console.log('');
+    console.log('Starting auto-sell process');
+    updateConsole('Starting auto-sell process');
 
     const id = setInterval(async () => {
       console.log('Fetching data');
+      updateConsole('Fetching data');
       const data = await fetchData();
       console.log('Starting autosell check');
+      updateConsole('Starting autosell check');
       for (const result of data) {
         const { address, ROI } = result;
-        if(ca && ca !== '0x' && address === ca) {
+        if (ca && ca !== '0x' && address === ca) {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for selected CA: " + address);
+            updateConsole("Checking ROI for selected CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
-            sellPercent();
-            clearInterval(intervalId);
+            await sellPercent();
           } else {
             console.log(roiThreshold + "% ROI not reached (" + ROI + ")");
+            updateConsole(roiThreshold + "% ROI not reached (" + ROI + ")");
           }
         } else if (ca === '0x') {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for CA: " + address);
+            updateConsole("Checking ROI for CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
-            sellPercent();
-            clearInterval(intervalId);
+            await sellPercent();
           } else {
             console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + address);
+            updateConsole(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + address);
           }
         }
       }
     }, 5000); // Refresh every 5 seconds
     setIntervalId(id);
+  };
+
+  const stopChecking = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+      setModalMessage('Auto-Sell stopped.');
+      setModalIsOpen(true);
+      updateConsole('Auto-Sell stopped.');
+    }
   };
 
   const toggleFetching = () => {
@@ -115,6 +134,10 @@ const App = () => {
 
   const closeModal = () => {
     setModalIsOpen(false);
+  };
+
+  const updateConsole = (message) => {
+    setConsoleMessages(prevMessages => [...prevMessages, message]);
   };
 
   return (
@@ -155,7 +178,11 @@ const App = () => {
                 <label>Sell Percentage (%):</label>
                 <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
               </div>
-              <button onClick={startChecking}>Start Auto-Sell</button>
+              {intervalId ? (
+                <button onClick={stopChecking}>Stop Auto-Sell</button>
+              ) : (
+                <button onClick={startChecking}>Start Auto-Sell</button>
+              )}
             </div>
           )}
 
@@ -243,8 +270,16 @@ const App = () => {
             )}
           </div>
         </div>
-      </div>
 
+        <div className="consoleModule">
+          <h2>Console</h2>
+          <div className="consoleContainer">
+            {consoleMessages.map((msg, index) => (
+              <div key={index} className="consoleMessage">{msg}</div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <Modal
         isOpen={modalIsOpen}
