@@ -42,7 +42,7 @@ const App = () => {
     }
   };
 
-  const sellPercent = async () => {
+  const sellPercent = async (address) => {
     if (!pk || !ca || !sellPercentConfig) {
       setModalMessage('Please fill in Private Key, Contract Address, and Sell Percentage.');
       setModalIsOpen(true);
@@ -53,7 +53,7 @@ const App = () => {
       await axios.get('https://printer.seipex.fi/sell', {
         params: {
           pk: pk,
-          ca: ca,
+          ca: address,
           percent: sellPercentConfig
         }
       });
@@ -91,7 +91,7 @@ const App = () => {
             console.log("Checking ROI for selected CA: " + address);
             updateConsole("Checking ROI for selected CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
-            await sellPercent();
+            await sellPercent(address);
           } else {
             console.log(roiThreshold + "% ROI not reached (" + ROI + ")");
             updateConsole(roiThreshold + "% ROI not reached (" + ROI + ")");
@@ -101,7 +101,7 @@ const App = () => {
             console.log("Checking ROI for CA: " + address);
             updateConsole("Checking ROI for CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
-            await sellPercent();
+            await sellPercent(address);
           } else {
             console.log(roiThreshold + "% ROI not reached (" + ROI + ") for " + symbol);
             updateConsole(roiThreshold + "% ROI not reached (" + ROI + ") for " + symbol);
