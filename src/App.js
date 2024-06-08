@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+setIntervalIdimport React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
 import './App.css';
@@ -78,11 +78,12 @@ const App = () => {
           console.log("Checking ROI for selected CA: " + address);
           setCalledTokens(prev => new Set(prev.add(address)));
           sellPercent();
+          clearInterval(intervalId);
         } else {
           console.log(ROI + "% ROI not reached");
         }
       }
-    }, 2000); // Refresh every 2 seconds
+    }, 5000); // Refresh every 5 seconds
     setIntervalId(id);
   };
 
@@ -91,7 +92,7 @@ const App = () => {
       clearInterval(fetchIntervalId);
       setFetchIntervalId(null);
     } else {
-      const id = setInterval(fetchData, 2000); // Refresh every 2 seconds
+      const id = setInterval(fetchData, 5000); // Refresh every 5 seconds
       setFetchIntervalId(id);
     }
   };
