@@ -26,7 +26,12 @@ const App = () => {
     }
 
     try {
-      const response = await axios.get(`https://printer.seipex.fi/roi?wallet=${wallet}&input=${input}`);
+      const response = await axios.get('https://printer.seipex.fi/roi', {
+        params: {
+          wallet: wallet,
+          input: input
+        }
+      });
       const results = response.data.results;
       setData(results);
       return results;
@@ -76,9 +81,18 @@ const App = () => {
         const { address, ROI } = result;
         console.log(ca);
         console.log(address);
-        if(ca && address === ca) {
+        if(ca != '0x' && address === ca) {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for selected CA: " + address);
+            setCalledTokens(prev => new Set(prev.add(address)));
+            sellPercent();
+            clearInterval(intervalId);
+          } else {
+            console.log(ROI + "% ROI not reached");
+          }
+        } else if (ca == '0x') {
+          if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
+            console.log("Checking ROI for CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
             sellPercent();
             clearInterval(intervalId);
