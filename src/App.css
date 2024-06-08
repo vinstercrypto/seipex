@@ -46,7 +46,6 @@ a {
  color: #783cbc;
 }
 
-
 a:hover {
   color: #6a00e3;
 }
@@ -98,8 +97,34 @@ button:hover {
   color: #fff;
 }
 
-.tokenBox p {
+.tokenBox .tokenField {
+  display: flex;
+  align-items: center;
   margin: 5px 0;
+}
+
+.tokenBox .fieldName {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.tokenBox .fieldValue {
+  flex-grow: 1;
+}
+
+.copyButton {
+  background-color: #6a0dad;
+  border: none;
+  max-width: 120px;
+  color: whitesmoke;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+}
+
+.copyButton:hover {
+  background-color: #8b00e6;
 }
 
 .modalContent {
@@ -148,7 +173,6 @@ button:hover {
   .container {
     flex-direction: column;
     align-items: center;
-    
   }
 
   .dashboard {
@@ -177,4 +201,3 @@ button:hover {
     color: #fff;
   }
 }
-

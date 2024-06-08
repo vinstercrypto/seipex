@@ -88,7 +88,7 @@ const App = () => {
           } else {
             console.log(ROI + "% ROI not reached");
           }
-        } else if (ca == '0x') {
+        } else if (ca === '0x') {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
@@ -204,13 +204,40 @@ const App = () => {
             {data && data.length > 0 && (
               data.map((result, index) => (
                 <div key={index} className="tokenBox">
-                  <p>CA: {result.address}</p>
-                  <p>Name: {result.name}</p>
-                  <p>Symbol: {result.symbol}</p>
-                  <p>Liquidity: {result.liquidity} ETH</p>
-                  <p>Market Cap: {result.mcap} ETH</p>
-                  <p>Output: {result.output} ETH</p>
-                  <p>ROI: {result.ROI}</p>
+                  <div className="tokenField">
+                    <div className="fieldName">CA</div>
+                    <div className="fieldValue" title={result.address}>{result.address.length > 17 ? `${result.address.substring(0, 17)}...` : result.address}</div>
+                    <button className="copyButton" onClick={() => navigator.clipboard.writeText(result.address)}>Copy CA</button>
+                  </div>
+                  <div className="tokenField">
+                    <div className="fieldName">Name</div>
+                    <div className="fieldValue">{result.name}</div>
+                  </div>
+                  <div className="tokenField">
+                    <div className="fieldName">Symbol</div>
+                    <div className="fieldValue">{result.symbol}</div>
+                  </div>
+                  <div className="tokenField">
+                    <div className="fieldName">Liquidity</div>
+                    <div className="fieldValue">{result.liquidity} ETH</div>
+                  </div>
+                  <div className="tokenField">
+                    <div className="fieldName">Market Cap</div>
+                    <div className="fieldValue">{result.mcap} ETH</div>
+                  </div>
+                  <div className="tokenField">
+                    <div className="fieldName">Output</div>
+                    <div className="fieldValue">{result.output} ETH</div>
+                  </div>
+                  <div className="tokenField">
+                    <div className="fieldName">ROI</div>
+                    <div className="fieldValue">{result.ROI}</div>
+                  </div>
+                  <div className="tokenField">
+                  <button className="copyButton" onClick={() => window.open(`https://basescan.org/address/${result.address}`, '_blank', 'noopener,noreferrer')}>Basescan</button>
+                  <button className="copyButton" onClick={() => window.open(`https://dexscreener.com/base/${result.address}`, '_blank', 'noopener,noreferrer')}>Dexscreener</button>
+     
+                  </div>
                 </div>
               ))
             )}
