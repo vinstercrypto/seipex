@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
 import './App.css';
@@ -81,7 +81,7 @@ const App = () => {
         const { address, ROI } = result;
         console.log(ca);
         console.log(address);
-        if(ca != '0x' && address === ca) {
+        if(ca && ca !== '0x' && address === ca) {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for selected CA: " + address);
             setCalledTokens(prev => new Set(prev.add(address)));
