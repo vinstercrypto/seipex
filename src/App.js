@@ -85,7 +85,7 @@ const App = () => {
       console.log('Starting autosell check');
       updateConsole('Starting autosell check');
       for (const result of data) {
-        const { address, ROI } = result;
+        const { address, ROI, symbol } = result;
         if (ca && ca !== '0x' && address === ca) {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for selected CA: " + address);
@@ -103,8 +103,8 @@ const App = () => {
             setCalledTokens(prev => new Set(prev.add(address)));
             await sellPercent();
           } else {
-            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + address);
-            updateConsole(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + address);
+            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for " + symbol);
+            updateConsole(roiThreshold + "% ROI not reached (" + ROI + ") for " + symbol);
           }
         }
       }

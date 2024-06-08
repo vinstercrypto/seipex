@@ -169,10 +169,19 @@ button:hover {
   flex-direction: column;
 }
 
-.consoleMessage {
-  padding: 10px;;
-  max-height: 100vh;
+.consoleContainer {
+  padding: 10px;
+  max-height: 85vh;
   overflow-y: scroll;
+}
+
+h2 {
+  padding-left: 10px;
+}
+
+.consoleMessage {
+  padding-left: 15px;
+  padding-top: 2px;
 }
 
 @media (min-width: 1000px) {
