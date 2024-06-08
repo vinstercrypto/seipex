@@ -79,8 +79,6 @@ const App = () => {
       console.log('Starting autosell check');
       for (const result of data) {
         const { address, ROI } = result;
-        console.log(ca);
-        console.log(address);
         if(ca && ca !== '0x' && address === ca) {
           if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
             console.log("Checking ROI for selected CA: " + address);
