@@ -19,9 +19,6 @@ const App = () => {
   const [calledTokens, setCalledTokens] = useState(new Set());
 
   useEffect(() => {
-    if (activeSection === 'auto-sell') {
-      fetchData();
-    }
     return () => {
       clearInterval(intervalId);
       clearInterval(fetchIntervalId);
