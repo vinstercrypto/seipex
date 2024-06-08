@@ -18,13 +18,6 @@ const App = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [calledTokens, setCalledTokens] = useState(new Set());
 
-  useEffect(() => {
-    return () => {
-      clearInterval(intervalId);
-      clearInterval(fetchIntervalId);
-    };
-  }, [activeSection]);
-
   const fetchData = async () => {
     if (!wallet || !input) {
       setModalMessage('Please fill in Wallet Address and Input.');
@@ -86,16 +79,16 @@ const App = () => {
           console.log(ROI + "% ROI not reached");
         }
       }
-    }, 2000); // Refresh every 3 seconds
+    }, 2000); // Refresh every 2 seconds
     setIntervalId(id);
   };
 
-  const startFetching = () => {
+  const toggleFetching = () => {
     if (fetchIntervalId) {
       clearInterval(fetchIntervalId);
       setFetchIntervalId(null);
     } else {
-      const id = setInterval(fetchData, 3000); // Refresh every 3 seconds
+      const id = setInterval(fetchData, 2000); // Refresh every 2 seconds
       setFetchIntervalId(id);
     }
   };
@@ -177,7 +170,7 @@ const App = () => {
                 <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
               </div>
               <button onClick={fetchData}>Fetch</button>
-              <button onClick={startFetching}>{fetchIntervalId ? 'Stop Fetching' : 'Start Fetching'}</button>
+              <button onClick={toggleFetching}>{fetchIntervalId ? 'Stop Fetching' : 'Start Fetching'}</button>
             </div>
           )}
         </div>
