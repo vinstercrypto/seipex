@@ -74,13 +74,15 @@ const App = () => {
       console.log('Starting autosell check');
       for (const result of data) {
         const { address, ROI } = result;
-        if (address == ca && parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
-          console.log("Checking ROI for selected CA: " + address);
-          setCalledTokens(prev => new Set(prev.add(address)));
-          sellPercent();
-          clearInterval(intervalId);
-        } else {
-          console.log(ROI + "% ROI not reached");
+        if(address == ca) {
+          if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
+            console.log("Checking ROI for selected CA: " + address);
+            setCalledTokens(prev => new Set(prev.add(address)));
+            sellPercent();
+            clearInterval(intervalId);
+          } else {
+            console.log(ROI + "% ROI not reached");
+          }
         }
       }
     }, 5000); // Refresh every 5 seconds
