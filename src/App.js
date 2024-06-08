@@ -204,12 +204,12 @@ const App = () => {
             {data && data.length > 0 && (
               data.map((result, index) => (
                 <div key={index} className="tokenBox">
-                  <p>Address: {result.address}</p>
+                  <p>CA: {result.address}</p>
                   <p>Name: {result.name}</p>
                   <p>Symbol: {result.symbol}</p>
-                  <p>Liquidity: {result.liquidity}</p>
-                  <p>Market Cap: {result.mcap}</p>
-                  <p>Output: {result.output}</p>
+                  <p>Liquidity: {result.liquidity} ETH</p>
+                  <p>Market Cap: {result.mcap} ETH</p>
+                  <p>Output: {result.output} ETH</p>
                   <p>ROI: {result.ROI}</p>
                 </div>
               ))
