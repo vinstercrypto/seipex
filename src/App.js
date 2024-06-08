@@ -96,7 +96,7 @@ const App = () => {
             clearInterval(intervalId);
           } else {
             console.log(ROI + "% ROI not reached");
-            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + ca);
+            console.log(roiThreshold + "% ROI not reached (" + ROI + ") for CA " + address);
           }
         }
       }
