@@ -73,17 +73,20 @@ const App = () => {
     setModalMessage('This action will start a process that checks and sells automatically. Keep the page open.');
     setModalIsOpen(true);
 
-    const results = await fetchData();
+    console.log('');
+    const data = await fetchData();
     const id = setInterval(async () => {
-      const data = await fetchData();
+      console.log('Starting autosell');
       for (const result of data) {
         const { address, ROI } = result;
         if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
           setCalledTokens(prev => new Set(prev.add(address)));
           sellPercent();
+        } else {
+          console.log(ROI + "% ROI not reached");
         }
       }
-    }, 3000); // Refresh every 3 seconds
+    }, 2000); // Refresh every 3 seconds
     setIntervalId(id);
   };
 
