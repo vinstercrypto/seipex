@@ -43,7 +43,7 @@ const App = () => {
   };
 
   const sellPercent = async (address) => {
-    if (!pk || !ca || !sellPercentConfig) {
+    if (!pk || !ca || address || !sellPercentConfig) {
       setModalMessage('Please fill in Private Key, Contract Address, and Sell Percentage.');
       setModalIsOpen(true);
       return;
@@ -206,7 +206,7 @@ const App = () => {
                 <label>Sell Percentage (%):</label>
                 <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
               </div>
-              <button onClick={sellPercent(sellPercentConfig)}>Sell Percentage</button>
+              <button onClick={() => sellPercent(sellPercentConfig)}>Sell Percentage</button>
             </div>
           )}
 
