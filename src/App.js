@@ -181,7 +181,7 @@ const App = () => {
               </div>
               <div>
                 <label>Sell Percentage (%):</label>
-                <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
+                <input type="number" value={ca} onChange={(e) => setSellPercentConfig(e.target.value)} />
               </div>
               {intervalId ? (
                 <button onClick={stopChecking}>Stop Auto-Sell</button>
