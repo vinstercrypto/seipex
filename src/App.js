@@ -206,7 +206,7 @@ const App = () => {
                 <label>Sell Percentage (%):</label>
                 <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
               </div>
-              <button onClick={sellPercent}>Sell Percentage</button>
+              <button onClick={sellPercent(sellPercentConfig)}>Sell Percentage</button>
             </div>
           )}
 
