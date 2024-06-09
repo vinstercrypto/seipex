@@ -108,7 +108,7 @@ const App = () => {
           }
         }
       }
-    }, 5000); // Refresh every 5 seconds
+    }, 3000); // Refresh every 3 seconds
     setIntervalId(id);
   };
 
@@ -127,7 +127,7 @@ const App = () => {
       clearInterval(fetchIntervalId);
       setFetchIntervalId(null);
     } else {
-      const id = setInterval(fetchData, 5000); // Refresh every 5 seconds
+      const id = setInterval(fetchData, 3000); // Refresh every 3 seconds
       setFetchIntervalId(id);
     }
   };
