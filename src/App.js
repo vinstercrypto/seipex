@@ -43,7 +43,7 @@ const App = () => {
   };
 
   const sellPercent = async (address) => {
-    if (!pk || !ca || address || !sellPercentConfig) {
+    if (!pk || !ca || !address || !sellPercentConfig) {
       setModalMessage('Please fill in Private Key, Contract Address, and Sell Percentage.');
       setModalIsOpen(true);
       return;
