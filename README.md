@@ -20,12 +20,12 @@ Before you begin, ensure you have met the following requirements:
 
 1. **Clone the repository:**
    `git clone https://github.com/IA-Lopez/seipex.git`
-   `cd seipex-manager`
+   `cd seipex`
 
 2. **Install dependencies:**
    `npm install`
 
-## Running the Application
+## Running locally
 
 To run the application locally, follow these steps:
 
