@@ -19,7 +19,7 @@ Before you begin, ensure you have met the following requirements:
 ## Installation
 
 1. **Clone the repository:**
-   `git clone https://github.com/your-username/seipex-manager.git`
+   `git clone https://github.com/IA-Lopez/seipex.git`
    `cd seipex-manager`
 
 2. **Install dependencies:**
