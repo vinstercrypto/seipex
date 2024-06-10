@@ -14,7 +14,7 @@ It interacts exclusively with the Seipex API and is deployed automatically from 
 
 Before you begin, ensure you have met the following requirements:
 - You have installed [Node.js](https://nodejs.org/) (which includes npm).
-- You have a Seipex API key (if required).
+- You have a Seipex Sniper wallet for Base.
 
 ## Installation
 
