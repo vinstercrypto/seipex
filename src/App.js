@@ -16,9 +16,9 @@ const App = () => {
   const [activeSection, setActiveSection] = useState('fetch-data');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [calledTokens, setCalledTokens] = useState(new Set());
+  const [calledTokens, setCalledTokens] = useState([{ address: '0x1221r1413r1240x1221r1413r1240x1221r1413r1240x1221r1413r124', symbol: 'ETH', sellPercentage: "20", estimatedSale: "20.20" }, { address: '0x1221r1413r1240x1221r1413r1240x1221r1413r1240x1221r1413r124', symbol: 'ETH', sellPercentage: "20", estimatedSale: "20.20" }]);
   const [consoleMessages, setConsoleMessages] = useState([]);
-  const consoleEndRef = useRef(null); // Añadir ref
+  const consoleEndRef = useRef(null);
 
   const logAndUpdateConsole = (message) => {
     console.log(message);
@@ -50,7 +50,7 @@ const App = () => {
     }
   };
 
-  const sellPercent = async (address) => {
+  const sellPercent = async (address, symbol, output) => {
     logAndUpdateConsole(`Starting sell for CA: ${address}`);
     if (!pk || !ca || !sellPercentConfig) {
       setModalMessage('Please fill in Private Key, Contract Address, and Sell Percentage.');
@@ -68,6 +68,7 @@ const App = () => {
         }
       });
       logAndUpdateConsole(`Sell of ${sellPercentConfig}% called for CA: ${address}`);
+      setCalledTokens(prev => [...prev, { address, symbol, sellPercentage: sellPercentConfig, estimatedSale: (sellPercentConfig / 100) * output }]);
     } catch (error) {
       logAndUpdateConsole(`Error calling sell endpoint for ${address}: ${error.message}`);
     }
@@ -99,22 +100,28 @@ const App = () => {
       if (data) {
         logAndUpdateConsole('Starting autosell');
         for (const result of data) {
-          const { address, ROI, symbol } = result;
+          const { address, ROI, symbol, output } = result;
           if (ca && ca !== '0x' && address === ca) {
-            if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
-              logAndUpdateConsole(`Checking ROI for selected CA: ${address}`);
-              setCalledTokens(prev => new Set(prev.add(address)));
-              await sellPercent(address);
+            if (!calledTokens.some(token => token.address === address)) {
+              if (parseFloat(ROI) >= roiThreshold) {
+                logAndUpdateConsole(`Threshold reached for CA: ${address}`);
+                await sellPercent(address, symbol, output);
+              } else {
+                logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI})`);
+              }
             } else {
-              logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI})`);
+              logAndUpdateConsole(`${address} Already sold, remove it from list so it is elegible again`);
             }
           } else if (ca === '0x') {
-            if (parseFloat(ROI) >= roiThreshold && !calledTokens.has(address)) {
-              logAndUpdateConsole(`Checking ROI for CA: ${address}`);
-              setCalledTokens(prev => new Set(prev.add(address)));
-              await sellPercent(address);
+            if (!calledTokens.some(token => token.address === address)) {
+              if (parseFloat(ROI) >= roiThreshold) {
+                logAndUpdateConsole(`Threshold reached for CA ${address}`);
+                await sellPercent(address, symbol, output);
+              } else {
+                logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI}) for ${symbol}`);
+              }
             } else {
-              logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI}) for ${symbol}`);
+              logAndUpdateConsole(`${address} Already sold, remove it from list so it is elegible again`);
             }
           }
         }
@@ -166,6 +173,10 @@ const App = () => {
     setConsoleMessages(prevMessages => [...prevMessages, message]);
   };
 
+  const handleSellAgain = (index) => {
+    setCalledTokens(prev => prev.filter((_, i) => i !== index));
+  };
+
   useEffect(() => {
     if (consoleEndRef.current) {
       consoleEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -175,7 +186,7 @@ const App = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1>Seipex Manager v0.1</h1> 
+        <h1>Seipex Manager v0.2</h1> 
         <h3>by <a href="https://x.com/_IA_Lopez" target="_blank" rel="noopener noreferrer">@_IA_LOPEZ</a></h3> 
         <button className="copyButton" onClick={() => navigator.clipboard.writeText("0x742281DcbC8df500f1D5DF6B4269e65e72FcAef9")}>Copy TIP wallet</button> 
         <button className="copyButton" onClick={() => window.open(`https://github.com/IA-Lopez/seipex`, '_blank', 'noopener,noreferrer')}>Github</button>
@@ -200,7 +211,7 @@ const App = () => {
                 <input type="password" value={pk} onChange={(e) => setPk(e.target.value)} />
               </div>
               <div>
-                <label>Input (ETH):</label>
+                <label>Initial buy amount (ETH):</label>
                 <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
               </div>
               <div>
@@ -250,7 +261,7 @@ const App = () => {
                 <input type="text" value={wallet} onChange={(e) => setWallet(e.target.value)} />
               </div>
               <div>
-                <label>Input (ETH):</label>
+                <label>Initial buy amount (ETH):</label>
                 <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
               </div>
               <button onClick={fetchData}>Fetch</button>
@@ -264,6 +275,38 @@ const App = () => {
           <div className="walletAddress">
             <p>Wallet: <a href={`https://basescan.org/address/${wallet}`} target="_blank" rel="noopener noreferrer">{wallet}</a></p>
           </div>
+          <div>
+            <h3>Sold tokens in this session</h3>
+            <div className="calledTokensContainer">
+              {calledTokens.length > 0 && (
+                <>
+                  <div className="calledTokenHeaders">
+                    <div className="fieldName">Symbol</div>
+                    <div className="fieldName">Sell Percentage</div>
+                    <div className="fieldName">Estimated Sale</div>
+                    <div className="fieldName"></div>
+                  </div>
+                  {calledTokens.map((token, index) => (
+                    <div key={index} className="calledTokenBox">
+                      <div className="calledTokenField">
+                        <div className="fieldValue">{token.symbol}</div>
+                      </div>
+                      <div className="calledTokenField">
+                        <div className="fieldValue">{token.sellPercentage}%</div>
+                      </div>
+                      <div className="calledTokenField">
+                        <div className="fieldValue">{token.estimatedSale} ETH</div>
+                      </div>
+                      <div className="calledTokenField">
+                        <button className="sellAgainButton" onClick={() => handleSellAgain(index)}>Sell again</button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+
           <div className="tokensContainer">
             {data && data.length > 0 && (
               data.map((result, index) => (
@@ -286,11 +329,11 @@ const App = () => {
                     <div className="fieldValue">{result.liquidity} ETH</div>
                   </div>
                   <div className="tokenField">
-                    <div className="fieldName">Market Cap</div>
+                    <div className="fieldName">Market cap</div>
                     <div className="fieldValue">{result.mcap} ETH</div>
                   </div>
                   <div className="tokenField">
-                    <div className="fieldName">Output</div>
+                    <div className="fieldName">Current value</div>
                     <div className="fieldValue">{result.output} ETH</div>
                   </div>
                   <div className="tokenField">
