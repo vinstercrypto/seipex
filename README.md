@@ -1,6 +1,7 @@
-# Seipex Manager, powered by Seipex
+# Seipex Manager, powered by [Seipex](https://www.seipex.fi/)
 
-Seipex Manager is a React-based application designed to manage tokens on Base purchased with an automatic sniper. This application can be run locally or accessed at [seipex.basedgeloto.com](https://seipex.basedgeloto.com).
+Seipex Manager is a React-based application designed to manage tokens on Base purchased with an automatic sniper.
+This application can be run locally or accessed at [seipex.basedgeloto.com](https://seipex.basedgeloto.com).
 It interacts exclusively with the Seipex API and is deployed automatically from this repository.
 
 ## Features
