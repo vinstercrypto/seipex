@@ -14,18 +14,18 @@ It interacts exclusively with the Seipex API and is deployed automatically from 
 
 Before you begin, ensure you have met the following requirements:
 - You have installed [Node.js](https://nodejs.org/) (which includes npm).
-- You have a Seipex API key (if required).
+- You have a Seipex Sniper wallet for Base.
 
 ## Installation
 
 1. **Clone the repository:**
-   `git clone https://github.com/your-username/seipex-manager.git`
-   `cd seipex-manager`
+   `git clone https://github.com/IA-Lopez/seipex.git`
+   `cd seipex`
 
 2. **Install dependencies:**
    `npm install`
 
-## Running the Application
+## Running locally
 
 To run the application locally, follow these steps:
 
