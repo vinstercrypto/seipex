@@ -16,7 +16,7 @@ const App = () => {
   const [activeSection, setActiveSection] = useState('fetch-data');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [calledTokens, setCalledTokens] = useState([{ address: '0x1221r1413r1240x1221r1413r1240x1221r1413r1240x1221r1413r124', symbol: 'ETH', sellPercentage: "20", estimatedSale: "20.20" }, { address: '0x1221r1413r1240x1221r1413r1240x1221r1413r1240x1221r1413r124', symbol: 'ETH', sellPercentage: "20", estimatedSale: "20.20" }]);
+  const [calledTokens, setCalledTokens] = useState([]);
   const [consoleMessages, setConsoleMessages] = useState([]);
   const consoleEndRef = useRef(null);
 
