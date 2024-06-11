@@ -1,7 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import Modal from 'react-modal';
+// src/App.js
+import React, { useState } from 'react';
 import './App.css';
+import Header from './components/Header';
+import FetchData from './components/FetchData';
+import AutoSell from './components/AutoSell';
+import ManualSell from './components/ManualSell';
+import TokensPortfolio from './components/TokensPortfolio';
+import Console from './components/Console';
+import ModalNotification from './components/ModalNotification';
 
 const App = () => {
   const [wallet, setWallet] = useState("");
@@ -18,158 +24,9 @@ const App = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [calledTokens, setCalledTokens] = useState([]);
   const [consoleMessages, setConsoleMessages] = useState([]);
-  const consoleEndRef = useRef(null);
 
   const logAndUpdateConsole = (message) => {
     console.log(message);
-    updateConsole(message);
-  };
-
-  const fetchData = async () => {
-    logAndUpdateConsole('Fetching data');
-    if (!wallet || !input) {
-      setModalMessage('Please fill in Wallet Address and Input.');
-      setModalIsOpen(true);
-      logAndUpdateConsole('Fetching data aborted: Wallet Address and Input required');
-      return;
-    }
-
-    try {
-      const response = await axios.get('https://printer.seipex.fi/roi', {
-        params: {
-          wallet: wallet,
-          input: input
-        }
-      });
-      const results = response.data.results;
-      setData(results);
-      logAndUpdateConsole('Fetching data completed successfully');
-      return results;
-    } catch (error) {
-      logAndUpdateConsole(`Error fetching data: ${error.message}`);
-    }
-  };
-
-  const sellPercent = async (address, symbol, output) => {
-    logAndUpdateConsole(`Starting sell for CA: ${address}`);
-    if (!pk || !ca || !sellPercentConfig) {
-      setModalMessage('Please fill in Private Key, Contract Address, and Sell Percentage.');
-      setModalIsOpen(true);
-      logAndUpdateConsole('Sell aborted: Missing required fields');
-      return;
-    }
-
-    try {
-      await axios.get('https://printer.seipex.fi/sell', {
-        params: {
-          pk: pk,
-          ca: address,
-          percent: sellPercentConfig
-        }
-      });
-      logAndUpdateConsole(`Sell of ${sellPercentConfig}% called for CA: ${address}`);
-      setCalledTokens(prev => [...prev, { address, symbol, sellPercentage: sellPercentConfig, estimatedSale: (sellPercentConfig / 100) * output }]);
-    } catch (error) {
-      logAndUpdateConsole(`Error calling sell endpoint for ${address}: ${error.message}`);
-    }
-  };
-
-  const startAutoSell = async () => {
-    logAndUpdateConsole('Starting Auto-sell');
-    if (!wallet || !input || !pk || !ca || !roiThreshold || !sellPercentConfig) {
-      setModalMessage('Please fill in all the fields for Auto-Sell.');
-      setModalIsOpen(true);
-      logAndUpdateConsole('Auto-sell aborted: Missing required fields');
-      return;
-    }
-
-    if (fetchIntervalId) {
-      clearInterval(fetchIntervalId);
-      setFetchIntervalId(null);
-      logAndUpdateConsole('Stopped fetching to avoid conflict with auto-sell');
-    }
-
-    setModalMessage('This action will start a process that checks and sells automatically. Keep the page open.');
-    setModalIsOpen(true);
-
-    logAndUpdateConsole('Starting auto-sell process');
-
-    const id = setInterval(async () => {
-      logAndUpdateConsole('Fetching data for auto-sell');
-      const data = await fetchData();
-      if (data) {
-        logAndUpdateConsole('Starting autosell');
-        for (const result of data) {
-          const { address, ROI, symbol, output } = result;
-          if (ca && ca !== '0x' && address === ca) {
-            if (!calledTokens.some(token => token.address === address)) {
-              if (parseFloat(ROI) >= roiThreshold) {
-                logAndUpdateConsole(`Threshold reached for CA: ${address}`);
-                await sellPercent(address, symbol, output);
-              } else {
-                logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI})`);
-              }
-            } else {
-              logAndUpdateConsole(`${address} Already sold, remove it from list so it is elegible again`);
-            }
-          } else if (ca === '0x') {
-            if (!calledTokens.some(token => token.address === address)) {
-              if (parseFloat(ROI) >= roiThreshold) {
-                logAndUpdateConsole(`Threshold reached for CA ${address}`);
-                await sellPercent(address, symbol, output);
-              } else {
-                logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI}) for ${symbol}`);
-              }
-            } else {
-              logAndUpdateConsole(`${address} Already sold, remove it from list so it is elegible again`);
-            }
-          }
-        }
-      } else {
-        logAndUpdateConsole('No data fetched for autosell');
-      }
-    }, 3000); // Refresh every 3 seconds
-
-    setIntervalId(id);
-  };
-
-  const stopAutoSell = () => {
-    logAndUpdateConsole('Stopping auto-sell process');
-    if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-      setModalMessage('Auto-Sell stopped.');
-      setModalIsOpen(true);
-      logAndUpdateConsole('Auto-Sell stopped.');
-    }
-  };
-
-  const toggleFetching = () => {
-    logAndUpdateConsole('Toggling fetch process');
-    if (intervalId) {
-      setModalMessage('Auto-sell is already active and auto-fetching');
-      setModalIsOpen(true);
-      logAndUpdateConsole('Fetch process not started: Auto-sell is already active');
-      return;
-    }
-
-    if (fetchIntervalId) {
-      clearInterval(fetchIntervalId);
-      setFetchIntervalId(null);
-      logAndUpdateConsole('Fetch process stopped');
-    } else {
-      fetchData();
-      const id = setInterval(fetchData, 3000); // Refresh every 3 seconds
-      setFetchIntervalId(id);
-      logAndUpdateConsole('Fetch process started');
-    }
-  };
-
-  const closeModal = () => {
-    setModalIsOpen(false);
-  };
-
-  const updateConsole = (message) => {
     setConsoleMessages(prevMessages => [...prevMessages, message]);
   };
 
@@ -177,20 +34,13 @@ const App = () => {
     setCalledTokens(prev => prev.filter((_, i) => i !== index));
   };
 
-  useEffect(() => {
-    if (consoleEndRef.current) {
-      consoleEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [consoleMessages]);
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
 
   return (
     <div className="container">
-      <div className="header">
-        <h1>Seipex Manager v0.2</h1> 
-        <h3>by <a href="https://x.com/_IA_Lopez" target="_blank" rel="noopener noreferrer">@_IA_LOPEZ</a></h3> 
-        <button className="copyButton" onClick={() => navigator.clipboard.writeText("0x742281DcbC8df500f1D5DF6B4269e65e72FcAef9")}>Copy TIP wallet</button> 
-        <button className="copyButton" onClick={() => window.open(`https://github.com/IA-Lopez/seipex`, '_blank', 'noopener,noreferrer')}>Github</button>
-      </div>
+      <Header />
       <div className="dashboard">
         <div className="panel">
           <div className="sectionsContainer">
@@ -199,179 +49,79 @@ const App = () => {
             <button onClick={() => setActiveSection('sell')}>Manual Sell</button>
           </div>
 
+          {activeSection === 'fetch-data' && (
+            <FetchData
+              wallet={wallet}
+              setWallet={setWallet}
+              input={input}
+              setInput={setInput}
+              setData={setData}
+              setModalMessage={setModalMessage}
+              setModalIsOpen={setModalIsOpen}
+              fetchIntervalId={fetchIntervalId}
+              setFetchIntervalId={setFetchIntervalId}
+              logAndUpdateConsole={logAndUpdateConsole}
+            />
+          )}
+
           {activeSection === 'auto-sell' && (
-            <div className="formModule">
-              <h2>Auto-Sell</h2>
-              <div>
-                <label>Wallet address:</label>
-                <input type="text" value={wallet} onChange={(e) => setWallet(e.target.value)} />
-              </div>
-              <div>
-                <label>Wallet private key (pk):</label>
-                <input type="password" value={pk} onChange={(e) => setPk(e.target.value)} />
-              </div>
-              <div>
-                <label>Initial buy amount (ETH):</label>
-                <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
-              </div>
-              <div>
-                <label>Contract address (CA):</label>
-                <input type="text" value={ca} onChange={(e) => setCa(e.target.value)} />
-              </div>
-              <div>
-                <label>ROI Threshold (%):</label>
-                <input type="number" value={roiThreshold} onChange={(e) => setRoiThreshold(e.target.value)} />
-              </div>
-              <div>
-                <label>Sell Percentage (%):</label>
-                <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
-              </div>
-              {intervalId ? (
-                <button onClick={stopAutoSell}>Stop Auto-Sell</button>
-              ) : (
-                <button onClick={startAutoSell}>Start Auto-Sell</button>
-              )}
-            </div>
+            <AutoSell
+              wallet={wallet}
+              setWallet={setWallet}
+              input={input}
+              setInput={setInput}
+              pk={pk}
+              setPk={setPk}
+              ca={ca}
+              setCa={setCa}
+              roiThreshold={roiThreshold}
+              setRoiThreshold={setRoiThreshold}
+              sellPercentConfig={sellPercentConfig}
+              setSellPercentConfig={setSellPercentConfig}
+              intervalId={intervalId}
+              setIntervalId={setIntervalId}
+              fetchIntervalId={fetchIntervalId}
+              setFetchIntervalId={setFetchIntervalId}
+              logAndUpdateConsole={logAndUpdateConsole}
+              setModalMessage={setModalMessage}
+              setModalIsOpen={setModalIsOpen}
+              calledTokens={calledTokens}
+              setCalledTokens={setCalledTokens}
+              setData={setData}
+            />
           )}
 
           {activeSection === 'sell' && (
-            <div className="formModule">
-              <h2>Sell</h2>
-              <div>
-                <label>Private Key (pk):</label>
-                <input type="password" value={pk} onChange={(e) => setPk(e.target.value)} />
-              </div>
-              <div>
-                <label>Contract Address (ca):</label>
-                <input type="text" value={ca} onChange={(e) => setCa(e.target.value)} />
-              </div>
-              <div>
-                <label>Sell Percentage (%):</label>
-                <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
-              </div>
-              <button onClick={() => sellPercent(ca)}>Sell Percentage</button>
-            </div>
-          )}
-
-          {activeSection === 'fetch-data' && (
-            <div className="formModule">
-              <h2>Fetch Portfolio</h2>
-              <div>
-                <label>Wallet Address:</label>
-                <input type="text" value={wallet} onChange={(e) => setWallet(e.target.value)} />
-              </div>
-              <div>
-                <label>Initial buy amount (ETH):</label>
-                <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
-              </div>
-              <button onClick={fetchData}>Fetch</button>
-              <button onClick={toggleFetching}>{fetchIntervalId ? 'Stop Auto-Fetching' : 'Start Auto-Fetching'}</button>
-            </div>
+            <ManualSell
+              pk={pk}
+              setPk={setPk}
+              ca={ca}
+              setCa={setCa}
+              sellPercentConfig={sellPercentConfig}
+              setSellPercentConfig={setSellPercentConfig}
+              logAndUpdateConsole={logAndUpdateConsole}
+              setModalMessage={setModalMessage}
+              setModalIsOpen={setModalIsOpen}
+            />
           )}
         </div>
 
-        <div className="tokensModule">
-          <h2>Tokens Portfolio</h2>
-          <div className="walletAddress">
-            <p>Wallet: <a href={`https://basescan.org/address/${wallet}`} target="_blank" rel="noopener noreferrer">{wallet}</a></p>
-          </div>
-          <div>
-            <h3>Sold tokens in this session</h3>
-            <div className="calledTokensContainer">
-              {calledTokens.length > 0 && (
-                <>
-                  <div className="calledTokenHeaders">
-                    <div className="fieldName">Symbol</div>
-                    <div className="fieldName">Sell Percentage</div>
-                    <div className="fieldName">Estimated Sale</div>
-                    <div className="fieldName"></div>
-                  </div>
-                  {calledTokens.map((token, index) => (
-                    <div key={index} className="calledTokenBox">
-                      <div className="calledTokenField">
-                        <div className="fieldValue">{token.symbol}</div>
-                      </div>
-                      <div className="calledTokenField">
-                        <div className="fieldValue">{token.sellPercentage}%</div>
-                      </div>
-                      <div className="calledTokenField">
-                        <div className="fieldValue">{token.estimatedSale} ETH</div>
-                      </div>
-                      <div className="calledTokenField">
-                        <button className="sellAgainButton" onClick={() => handleSellAgain(index)}>Sell again</button>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
+        <TokensPortfolio
+          wallet={wallet}
+          data={data}
+          calledTokens={calledTokens}
+          handleSellAgain={handleSellAgain}
+          logAndUpdateConsole={logAndUpdateConsole}
+        />
 
-          <div className="tokensContainer">
-            {data && data.length > 0 && (
-              data.map((result, index) => (
-                <div key={index} className="tokenBox">
-                  <div className="tokenField">
-                    <div className="fieldName">CA</div>
-                    <div className="fieldValue" title={result.address}>{result.address.length > 17 ? `${result.address.substring(0, 17)}...` : result.address}</div>
-                    <button className="copyButton" onClick={() => navigator.clipboard.writeText(result.address)}>Copy CA</button>
-                  </div>
-                  <div className="tokenField">
-                    <div className="fieldName">Name</div>
-                    <div className="fieldValue">{result.name}</div>
-                  </div>
-                  <div className="tokenField">
-                    <div className="fieldName">Symbol</div>
-                    <div className="fieldValue">{result.symbol}</div>
-                  </div>
-                  <div className="tokenField">
-                    <div className="fieldName">Liquidity</div>
-                    <div className="fieldValue">{result.liquidity} ETH</div>
-                  </div>
-                  <div className="tokenField">
-                    <div className="fieldName">Market cap</div>
-                    <div className="fieldValue">{result.mcap} ETH</div>
-                  </div>
-                  <div className="tokenField">
-                    <div className="fieldName">Current value</div>
-                    <div className="fieldValue">{result.output} ETH</div>
-                  </div>
-                  <div className="tokenField">
-                    <div className="fieldName">ROI</div>
-                    <div className="fieldValue">{result.ROI}</div>
-                  </div>
-                  <div className="tokenField">
-                    <button className="copyButton" onClick={() => window.open(`https://basescan.org/address/${result.address}`, '_blank', 'noopener,noreferrer')}>Basescan</button>
-                    <button className="copyButton" onClick={() => window.open(`https://dexscreener.com/base/${result.address}`, '_blank', 'noopener,noreferrer')}>Dexscreener</button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="consoleModule">
-          <h2>Console</h2>
-          <div className="consoleContainer">
-            {consoleMessages.map((msg, index) => (
-              <div key={index} className="consoleMessage">{msg}</div>
-            ))}
-            <div ref={consoleEndRef} />
-          </div>
-        </div>
+        <Console consoleMessages={consoleMessages} />
       </div>
 
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        contentLabel="Notification"
-        className="modalContent"
-        overlayClassName="modalOverlay"
-      >
-        <h2>Notification</h2>
-        <p>{modalMessage}</p>
-        <button onClick={closeModal}>Close</button>
-      </Modal>
+      <ModalNotification
+        modalIsOpen={modalIsOpen}
+        closeModal={closeModal}
+        modalMessage={modalMessage}
+      />
     </div>
   );
 };
