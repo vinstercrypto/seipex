@@ -51,6 +51,12 @@ h1 {
   margin-bottom: 20px;
 }
 
+.formModule {
+  height: fit-content;
+  overflow-y: scroll;
+  max-height: 80vh;
+}
+
 a {
  color: #783cbc;
 }

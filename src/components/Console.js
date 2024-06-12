@@ -1,3 +1,5 @@
+// src/components/Console.js
+
 import React, { useRef, useEffect, useState } from 'react';
 
 const Console = ({ consoleMessages }) => {

@@ -1,4 +1,5 @@
 // src/App.js
+
 import React, { useState } from 'react';
 import './App.css';
 import Header from './components/Header';
@@ -8,6 +9,8 @@ import ManualSell from './components/ManualSell';
 import TokensPortfolio from './components/TokensPortfolio';
 import Console from './components/Console';
 import ModalNotification from './components/ModalNotification';
+import ModalConfirmation from './components/ModalConfirmation';
+import { sellPercentApi } from './services/api';
 
 const App = () => {
   const [wallet, setWallet] = useState("");
@@ -16,6 +19,8 @@ const App = () => {
   const [ca, setCa] = useState("0x");
   const [roiThreshold, setRoiThreshold] = useState(200);
   const [sellPercentConfig, setSellPercentConfig] = useState(50);
+  const [stopLoss, setStopLoss] = useState(null);
+  const [stopLossSellPercent, setStopLossSellPercent ] = useState(null);
   const [data, setData] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
   const [fetchIntervalId, setFetchIntervalId] = useState(null);
@@ -23,7 +28,10 @@ const App = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [calledTokens, setCalledTokens] = useState([]);
+  const [soldTokens, setSoldTokens] = useState([]);
   const [consoleMessages, setConsoleMessages] = useState([]);
+  const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
+  const [tokenToSell, setTokenToSell] = useState(null);
 
   const logAndUpdateConsole = (message) => {
     setConsoleMessages(prevMessages => [...prevMessages, message]);
@@ -35,6 +43,35 @@ const App = () => {
 
   const closeModal = () => {
     setModalIsOpen(false);
+  };
+
+  const openConfirmModal = (token) => {
+    if (!pk) {
+      setModalMessage('Private Key is required to sell tokens.');
+      setModalIsOpen(true);
+      return;
+    }
+    setTokenToSell(token);
+    setConfirmModalIsOpen(true);
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModalIsOpen(false);
+    setTokenToSell(null);
+  };
+
+  const confirmSell = async () => {
+    if (!tokenToSell) return;
+
+    try {
+      await sellPercentApi(pk, tokenToSell.address, 100);
+      logAndUpdateConsole(`Sell of 100% called for CA: ${tokenToSell.address}`);
+      setCalledTokens(prev => prev.filter(token => token.address !== tokenToSell.address));
+      setSoldTokens(prev => [...prev, { ...tokenToSell, sellPercentage: 100, estimatedSale: tokenToSell.output }]);
+      closeConfirmModal();
+    } catch (error) {
+      logAndUpdateConsole(`Error calling sell endpoint for ${tokenToSell.address}: ${error.message}`);
+    }
   };
 
   return (
@@ -77,6 +114,10 @@ const App = () => {
               setRoiThreshold={setRoiThreshold}
               sellPercentConfig={sellPercentConfig}
               setSellPercentConfig={setSellPercentConfig}
+              stopLoss={stopLoss}
+              setStopLoss={setStopLoss}
+              stopLossSellPercent={stopLossSellPercent}
+              setStopLossSellPercent={setStopLossSellPercent}
               intervalId={intervalId}
               setIntervalId={setIntervalId}
               fetchIntervalId={fetchIntervalId}
@@ -86,6 +127,8 @@ const App = () => {
               setModalIsOpen={setModalIsOpen}
               calledTokens={calledTokens}
               setCalledTokens={setCalledTokens}
+              soldTokens={soldTokens}
+              setSoldTokens={setSoldTokens}
               setData={setData}
             />
           )}
@@ -101,6 +144,9 @@ const App = () => {
               logAndUpdateConsole={logAndUpdateConsole}
               setModalMessage={setModalMessage}
               setModalIsOpen={setModalIsOpen}
+              data={data}
+              soldTokens={soldTokens}
+              setSoldTokens={setSoldTokens}
             />
           )}
         </div>
@@ -109,8 +155,10 @@ const App = () => {
           wallet={wallet}
           data={data}
           calledTokens={calledTokens}
+          soldTokens={soldTokens}
           handleSellAgain={handleSellAgain}
           logAndUpdateConsole={logAndUpdateConsole}
+          openConfirmModal={openConfirmModal}
         />
 
         <Console consoleMessages={consoleMessages} />
@@ -120,6 +168,13 @@ const App = () => {
         modalIsOpen={modalIsOpen}
         closeModal={closeModal}
         modalMessage={modalMessage}
+      />
+
+      <ModalConfirmation
+        modalIsOpen={confirmModalIsOpen}
+        closeModal={closeConfirmModal}
+        modalMessage={`Confirm selling 100% of ${tokenToSell?.symbol}?`}
+        confirmAction={confirmSell}
       />
     </div>
   );
