@@ -40,7 +40,7 @@ const AutoSell = ({
         }
 
         try {
-            //await sellPercentApi(pk, address, percent);
+            await sellPercentApi(pk, address, percent);
             logAndUpdateConsole(`Sell of ${percent}% called for CA: ${address}`);
             const newCalledToken = { address, symbol, sellPercentage: percent, estimatedSale: (percent / 100) * output };
             setCalledTokens(prev => {
