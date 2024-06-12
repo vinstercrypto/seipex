@@ -13,3 +13,9 @@ export const sellPercentApi = async (pk, ca, sellPercentConfig) => {
     params: { pk, ca, percent: sellPercentConfig }
   });
 };
+
+export const buyETHApi = async (pk, ca, ethAmount) => {
+    await axios.get('https://printer.seipex.fi/buy', {
+      params: { pk, ca, amount: ethAmount }
+    });
+  };

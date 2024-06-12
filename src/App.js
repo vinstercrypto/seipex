@@ -26,7 +26,6 @@ const App = () => {
   const [consoleMessages, setConsoleMessages] = useState([]);
 
   const logAndUpdateConsole = (message) => {
-    console.log(message);
     setConsoleMessages(prevMessages => [...prevMessages, message]);
   };
 

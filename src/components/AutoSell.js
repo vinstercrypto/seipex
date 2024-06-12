@@ -1,5 +1,6 @@
 // src/components/AutoSell.js
-import React from 'react';
+
+import React, { useRef } from 'react';
 import { sellPercentApi, fetchDataApi } from '../services/api';
 
 const AutoSell = ({
@@ -8,6 +9,7 @@ const AutoSell = ({
   setFetchIntervalId, logAndUpdateConsole, setModalMessage, setModalIsOpen,
   calledTokens, setCalledTokens, setData
 }) => {
+  const calledTokensRef = useRef(calledTokens);
 
   const fetchData = async () => {
     logAndUpdateConsole('Fetching data');
@@ -40,7 +42,12 @@ const AutoSell = ({
     try {
       await sellPercentApi(pk, address, sellPercentConfig);
       logAndUpdateConsole(`Sell of ${sellPercentConfig}% called for CA: ${address}`);
-      setCalledTokens(prev => [...prev, { address, symbol, sellPercentage: sellPercentConfig, estimatedSale: (sellPercentConfig / 100) * output }]);
+      const newCalledToken = { address, symbol, sellPercentage: sellPercentConfig, estimatedSale: (sellPercentConfig / 100) * output };
+      setCalledTokens(prev => {
+        const updatedCalledTokens = [...prev, newCalledToken];
+        calledTokensRef.current = updatedCalledTokens;
+        return updatedCalledTokens;
+      });
     } catch (error) {
       logAndUpdateConsole(`Error calling sell endpoint for ${address}: ${error.message}`);
     }
@@ -73,8 +80,9 @@ const AutoSell = ({
         logAndUpdateConsole('Starting autosell');
         for (const result of data) {
           const { address, ROI, symbol, output } = result;
+          const currentCalledTokens = calledTokensRef.current;
           if (ca && ca !== '0x' && address === ca) {
-            if (!calledTokens.some(token => token.address === address)) {
+            if (!currentCalledTokens.some(token => token.address === address)) {
               if (parseFloat(ROI) >= roiThreshold) {
                 logAndUpdateConsole(`Threshold reached for CA: ${address}`);
                 await sellPercent(address, symbol, output);
@@ -85,7 +93,7 @@ const AutoSell = ({
               logAndUpdateConsole(`${address} Already sold, remove it from list so it is elegible again`);
             }
           } else if (ca === '0x') {
-            if (!calledTokens.some(token => token.address === address)) {
+            if (!currentCalledTokens.some(token => token.address === address)) {
               if (parseFloat(ROI) >= roiThreshold) {
                 logAndUpdateConsole(`Threshold reached for CA ${address}`);
                 await sellPercent(address, symbol, output);
