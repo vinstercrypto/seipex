@@ -1,6 +1,4 @@
-// src/components/AutoSell.js
-
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { sellPercentApi, fetchDataApi } from '../services/api';
 
 const AutoSell = ({
@@ -9,6 +7,7 @@ const AutoSell = ({
     intervalId, setIntervalId, fetchIntervalId, setFetchIntervalId, logAndUpdateConsole, setModalMessage, setModalIsOpen,
     calledTokens, setCalledTokens, setSoldTokens, setData
 }) => {
+    const [isStopLossEnabled, setIsStopLossEnabled] = useState(false);
     const calledTokensRef = useRef(calledTokens);
 
     const fetchData = async () => {
@@ -85,14 +84,15 @@ const AutoSell = ({
                     const parsedROI = parseFloat(ROI);
 
                     const thresholdReached = parsedROI >= roiThreshold;
-                    const stopLossReached = stopLoss && parsedROI <= stopLoss;
+                    const stopLossValue = stopLoss && stopLoss.trim() !== "" ? parseFloat(stopLoss) : null;
+                    const stopLossReached = stopLossValue !== null && parsedROI <= stopLossValue;
 
                     if (ca && ca !== '0x' && address === ca) {
                         if (!currentCalledTokens.some(token => token.address === address)) {
                             if (thresholdReached) {
                                 logAndUpdateConsole(`Threshold reached for CA: ${address}`);
                                 await sellPercent(address, symbol, output, sellPercentConfig);
-                            } else if (stopLossReached) {
+                            } else if (isStopLossEnabled && stopLossReached) {
                                 logAndUpdateConsole(`Stop loss reached for CA: ${address}`);
                                 await sellPercent(address, symbol, output, stopLossSellPercent);
                             } else {
@@ -106,8 +106,8 @@ const AutoSell = ({
                             if (thresholdReached) {
                                 logAndUpdateConsole(`Threshold reached for CA ${address}`);
                                 await sellPercent(address, symbol, output, sellPercentConfig);
-                            } else if (stopLossReached) {
-                                logAndUpdateConsole(`Stop loss reached for CA: ${address}`);
+                            } else if (isStopLossEnabled && stopLossReached) {
+                                logAndUpdateConsole(`Stop loss reached for CA ${address}`);
                                 await sellPercent(address, symbol, output, stopLossSellPercent);
                             } else {
                                 logAndUpdateConsole(`${roiThreshold}% ROI not reached (${ROI}) for ${symbol}`);
@@ -163,14 +163,28 @@ const AutoSell = ({
                 <label>Sell Percentage (%):</label>
                 <input type="number" value={sellPercentConfig} onChange={(e) => setSellPercentConfig(e.target.value)} />
             </div>
-            <div>
-                <label>Stop Loss (%):</label>
-                <input type="number" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
-            </div>
-            <div>
-                <label>Stop Loss Sell Percentage (%):</label>
-                <input type="number" value={stopLossSellPercent} onChange={(e) => setStopLossSellPercent(e.target.value)} />
-            </div>
+            {!isStopLossEnabled && (
+                <>
+                    <div>
+                        <label class="enableStopLoss">
+                            <input type="checkbox" class="checkStopLoss" checked={isStopLossEnabled} onChange={(e) => setIsStopLossEnabled(e.target.checked)} />
+                            Enable Stop Loss
+                        </label>
+                    </div>
+            </>
+            )}
+            {isStopLossEnabled && (
+                <>
+                    <div>
+                        <label>Stop Loss (-%):</label>
+                        <input type="text" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
+                    </div>
+                    <div>
+                        <label>Stop Loss Sell Percentage (%):</label>
+                        <input type="number" value={stopLossSellPercent} onChange={(e) => setStopLossSellPercent(e.target.value)} />
+                    </div>
+                </>
+            )}
             {intervalId ? (
                 <button onClick={stopAutoSell}>Stop Auto-Sell</button>
             ) : (

@@ -142,6 +142,22 @@ button:hover {
   background-color: #8b00e6;
 }
 
+.tipWallet {
+  background-color: #8b00e6;
+  border: none;
+  max-width: 150px;
+  color: whitesmoke;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+}
+
+.tipWallet:hover {
+  background-color: #6a0dad;
+}
+
+
 .modalContent {
   padding: 20px;
   background: #1a0037;
@@ -256,6 +272,16 @@ h2 {
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin: 0px;
+}
+
+.enableStopLoss {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.checkStopLoss {
+  width: 30px;
 }
 
 @media (min-width: 1400px) {
